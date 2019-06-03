@@ -1,0 +1,8 @@
+[package]
+name = "prime"
+version = "0.1.0"
+authors = ["Quinten Kock <quinten@quinten.space>"]
+edition = "2018"
+
+[dependencies]
+integer-sqrt = "0.1.2"
