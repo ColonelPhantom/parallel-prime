@@ -36,8 +36,13 @@ impl ThreadPool {
         Self {threads, work}
     }
 
-    pub fn enqueue(f: Box<FnOnce()+Send>) {
+    // TODO: stop the threads when the pool gets destroyed.
 
+    pub fn enqueue(&self, f: Box<FnOnce()+Send>) {
+        let mut queue_lock = self.work.tasks.lock().unwrap();
+        queue_lock.push_back(f);
+        drop(queue_lock);
+        self.work.cvar.notify_one();
     }
 }
 
@@ -45,7 +50,7 @@ fn worker(queue: Arc<WorkQueue>) {
     loop {
         let mut queue_lock = queue.tasks.lock().unwrap();
 
-        while queue_lock.len() == 0 {
+        if queue_lock.len() == 0 {
             queue_lock = queue.cvar.wait(queue_lock).unwrap();
         }
         let task = queue_lock.pop_front().unwrap();
