@@ -1,4 +1,4 @@
-use std::sync::{Arc,Mutex,Condvar,MutexGuard};
+use std::sync::{Arc,Mutex,Condvar};
 use std::collections::VecDeque;
 
 // type WorkQueue = Arc<Mutex<(VecDeque<Box<Fn()+Send>>, Condvar)>>;
@@ -43,7 +43,7 @@ impl ThreadPool {
 
 fn worker(queue: Arc<WorkQueue>) {
     loop {
-        let mut queue_lock: MutexGuard<VecDeque<Box<FnOnce()+Send>>> = queue.tasks.lock().unwrap();
+        let mut queue_lock = queue.tasks.lock().unwrap();
 
         while queue_lock.len() == 0 {
             queue_lock = queue.cvar.wait(queue_lock).unwrap();
