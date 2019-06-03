@@ -4,7 +4,17 @@ use std::collections::VecDeque;
 
 // type WorkQueue = Arc<Mutex<(VecDeque<Box<Fn()+Send>>, Condvar)>>;
 
-
+pub struct TaskQueue {
+    queue: VecDeque<Box<FnOnce()+Send>>,
+}
+impl TaskQueue {
+    pub fn new() -> Self {
+        Self {queue: VecDeque::new()}
+    }
+    pub fn enqueue(&mut self, task: Box<FnOnce()+Send>) {
+        self.queue.push_back(task);
+    }
+}
 
 struct WorkQueue {
     tasks: Mutex<VecDeque<Box<FnOnce()+Send>>>,
@@ -45,9 +55,9 @@ impl ThreadPool {
         drop(queue_lock);
         self.work.cvar.notify_one();
     }
-    pub fn enqueue_many(&self, vf: &mut VecDeque<Box<FnOnce()+Send>>) {
+    pub fn enqueue_many(&self, mut vf: TaskQueue) {
         let mut queue_lock = self.work.tasks.lock();
-        queue_lock.append(vf);
+        queue_lock.append(&mut vf.queue);
         drop(queue_lock);
         self.work.cvar.notify_all();
     }
