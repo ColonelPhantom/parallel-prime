@@ -1,6 +1,6 @@
 mod threadpool;
 
-fn is_prime(num: u32) -> bool {
+fn is_prime(num: usize) -> bool {
     if num < 2 {
         return false;
     }
