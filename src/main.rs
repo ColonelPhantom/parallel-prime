@@ -17,7 +17,7 @@ fn is_prime(num: usize) -> bool {
 }
 
 fn main() {
-    let max_num = 1000000;
+    let max_num = 4000000;
 
     let now = std::time::Instant::now();
     let mut prime_count = 0;
