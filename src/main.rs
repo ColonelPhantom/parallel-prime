@@ -38,7 +38,7 @@ fn main() {
     let prime_count = Arc::new(atomic::AtomicUsize::new(0));
     let mut pool_queue = threadpool::TaskQueue::new();
     for i in 1..=max_num {
-        let prime_count_clone = prime_count.clone();
+        let prime_count_clone = Arc::clone(&prime_count);
         pool_queue.enqueue(Box::new(move || {
             if is_prime(i) {
                 prime_count_clone.fetch_add(1, atomic::Ordering::Relaxed);
