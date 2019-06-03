@@ -4,6 +4,7 @@ use std::collections::VecDeque;
 // type WorkQueue = Arc<Mutex<(VecDeque<Box<Fn()+Send>>, Condvar)>>;
 
 
+
 struct WorkQueue {
     tasks: Mutex<VecDeque<Box<FnOnce()+Send>>>,
     cvar: Condvar,
@@ -37,17 +38,22 @@ impl ThreadPool {
         Self {threads, work}
     }
 
-    // TODO: stop the threads when the pool gets destroyed.
-
     pub fn enqueue(&self, f: Box<FnOnce()+Send>) {
         let mut queue_lock = self.work.tasks.lock().unwrap();
         queue_lock.push_back(f);
         drop(queue_lock);
         self.work.cvar.notify_one();
     }
+    pub fn enqueue_many(&self, vf: &mut VecDeque<Box<FnOnce()+Send>>) {
+        let mut queue_lock = self.work.tasks.lock().unwrap();
+        queue_lock.append(vf);
+        drop(queue_lock);
+        self.work.cvar.notify_all();
+    }
     pub fn shutdown(&self) {
         let mut shutdown_lock = self.work.shutdown.lock().unwrap();
         *shutdown_lock = true;
+        self.work.cvar.notify_all();
     }
     pub fn shutdown_wait(&mut self) {
         self.shutdown();
