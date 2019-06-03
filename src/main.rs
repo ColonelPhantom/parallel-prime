@@ -1,3 +1,5 @@
+mod threadpool;
+
 fn is_prime(num: u32) -> bool {
     if num < 2 {
         return false;
@@ -25,4 +27,6 @@ fn main() {
     }
     println!("Number of primes under {}: {}", max_num, prime_count);
     println!("Elapsed time: {} ms", now.elapsed().as_millis());
+
+    let pool = threadpool::ThreadPool::new(4);
 }
