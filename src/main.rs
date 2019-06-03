@@ -1,5 +1,7 @@
 mod threadpool;
 
+use std::collections::VecDeque;
+
 fn is_prime(num: usize) -> bool {
     if num < 2 {
         return false;
@@ -32,11 +34,10 @@ fn main() {
 
 
     use std::sync::{Arc,atomic};
-    
+
     let now = std::time::Instant::now();
     let mut pool = threadpool::ThreadPool::new(8);
     let prime_count = Arc::new(atomic::AtomicUsize::new(0));
-    use std::collections::VecDeque;
     let mut pool_enqueue: VecDeque<Box<FnOnce()+Send>> = VecDeque::with_capacity(max_num);
     for i in 1..=max_num {
         let prime_count_clone = prime_count.clone();
