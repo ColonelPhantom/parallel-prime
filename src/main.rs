@@ -8,7 +8,7 @@ fn is_prime(num: usize) -> bool {
         return true;
     }
     use integer_sqrt::IntegerSquareRoot;
-    for i in 2..num.integer_sqrt() {
+    for i in 2..(num.integer_sqrt()+1) {
         if num % i == 0 {
             return false;
         }
