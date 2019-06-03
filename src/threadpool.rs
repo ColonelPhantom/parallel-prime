@@ -1,4 +1,5 @@
-use std::sync::{Arc,Mutex,Condvar};
+use std::sync::Arc;
+use parking_lot::{Mutex,Condvar};
 use std::collections::VecDeque;
 
 // type WorkQueue = Arc<Mutex<(VecDeque<Box<Fn()+Send>>, Condvar)>>;
@@ -39,19 +40,19 @@ impl ThreadPool {
     }
 
     pub fn enqueue(&self, f: Box<FnOnce()+Send>) {
-        let mut queue_lock = self.work.tasks.lock().unwrap();
+        let mut queue_lock = self.work.tasks.lock();
         queue_lock.push_back(f);
         drop(queue_lock);
         self.work.cvar.notify_one();
     }
     pub fn enqueue_many(&self, vf: &mut VecDeque<Box<FnOnce()+Send>>) {
-        let mut queue_lock = self.work.tasks.lock().unwrap();
+        let mut queue_lock = self.work.tasks.lock();
         queue_lock.append(vf);
         drop(queue_lock);
         self.work.cvar.notify_all();
     }
     pub fn shutdown(&self) {
-        let mut shutdown_lock = self.work.shutdown.lock().unwrap();
+        let mut shutdown_lock = self.work.shutdown.lock();
         *shutdown_lock = true;
         self.work.cvar.notify_all();
     }
@@ -65,14 +66,14 @@ impl ThreadPool {
 
 fn worker(queue: Arc<WorkQueue>) {
     loop {
-        let mut queue_lock = queue.tasks.lock().unwrap();
+        let mut queue_lock = queue.tasks.lock();
 
         while queue_lock.len() == 0 {
-            if *queue.shutdown.lock().unwrap() {
+            if *queue.shutdown.lock() {
                 // No more tasks and pool is shutting down. Stop worker.
                 return;
             }
-            queue_lock = queue.cvar.wait(queue_lock).unwrap();
+            queue.cvar.wait(&mut queue_lock);
         }
         let task = queue_lock.pop_front().unwrap();
         drop(queue_lock);
