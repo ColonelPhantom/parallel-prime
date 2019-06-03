@@ -49,6 +49,12 @@ impl ThreadPool {
         let mut shutdown_lock = self.work.shutdown.lock().unwrap();
         *shutdown_lock = true;
     }
+    pub fn shutdown_wait(&mut self) {
+        self.shutdown();
+        for _i in 0..self.threads.len() {
+            self.threads.pop().unwrap().join().expect("Error joining thread!");
+        }
+    }
 }
 
 fn worker(queue: Arc<WorkQueue>) {
