@@ -18,19 +18,18 @@ impl WorkQueue {
 }
 
 pub struct ThreadPool {
-    threads: Vec<std::thread::Thread>,
-    work: Arc<WorkQueue>,
-    
+    threads: Vec<std::thread::JoinHandle<()>>,
+    work: Arc<WorkQueue>,  
 }
 impl ThreadPool {
     pub fn new(thread_num: usize) -> Self {
         let mut threads = Vec::with_capacity(thread_num);
         let work = Arc::new(WorkQueue::new());
-        for i in 0..thread_num {
+        for _i in 0..thread_num {
             let threadwork = Arc::clone(&work);
-            threads[i] = std::thread::spawn(move || {
+            threads.push(std::thread::spawn(move || {
                 worker(threadwork);
-            }).thread().clone();
+            }));
         }
 
         Self {threads, work}
@@ -50,7 +49,7 @@ fn worker(queue: Arc<WorkQueue>) {
     loop {
         let mut queue_lock = queue.tasks.lock().unwrap();
 
-        if queue_lock.len() == 0 {
+        while queue_lock.len() == 0 {
             queue_lock = queue.cvar.wait(queue_lock).unwrap();
         }
         let task = queue_lock.pop_front().unwrap();
