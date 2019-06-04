@@ -11,8 +11,8 @@ impl TaskQueue {
     pub fn new() -> Self {
         Self {queue: VecDeque::new()}
     }
-    pub fn enqueue(&mut self, task: Box<FnOnce()+Send>) {
-        self.queue.push_back(task);
+    pub fn enqueue<F: 'static>(&mut self, task: F) where F: FnOnce()+Send {
+        self.queue.push_back(Box::new(task));
     }
 }
 
@@ -49,9 +49,9 @@ impl ThreadPool {
         Self {threads, work}
     }
 
-    pub fn enqueue(&self, f: Box<FnOnce()+Send>) {
+    pub fn enqueue<F: 'static>(&self, f: F) where F: FnOnce()+Send {
         let mut queue_lock = self.work.tasks.lock();
-        queue_lock.push_back(f);
+        queue_lock.push_back(Box::new(f));
         drop(queue_lock);
         self.work.cvar.notify_one();
     }

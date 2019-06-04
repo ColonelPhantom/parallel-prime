@@ -39,11 +39,11 @@ fn main() {
     let mut pool_queue = threadpool::TaskQueue::new();
     for i in 1..=max_num {
         let prime_count_clone = Arc::clone(&prime_count);
-        pool_queue.enqueue(Box::new(move || {
+        pool_queue.enqueue(move || {
             if is_prime(i) {
                 prime_count_clone.fetch_add(1, atomic::Ordering::Relaxed);
             }
-        }));
+        });
     }
     pool.enqueue_many(pool_queue);
     pool.shutdown_wait();
