@@ -73,6 +73,11 @@ impl ThreadPool {
         }
     }
 }
+impl Drop for ThreadPool {
+    fn drop(&mut self) {
+        self.shutdown();
+    }
+}
 
 fn worker(queue: Arc<WorkQueue>) {
     loop {
