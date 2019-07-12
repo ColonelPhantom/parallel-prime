@@ -4,7 +4,6 @@ use crossbeam_channel::bounded;
 pub struct ThreadPool {
     threads: Vec<std::thread::JoinHandle<()>>,
     tx: Option<crossbeam_channel::Sender<Box<FnOnce()+Send>>>,
-    rx: crossbeam_channel::Receiver<Box<FnOnce()+Send>>,
     shutdown: RwLock<bool>,
 }
 impl ThreadPool {
@@ -19,7 +18,7 @@ impl ThreadPool {
         }
         let shutdown = RwLock::new(false);
 
-        Self {threads, tx: Some(tx), rx, shutdown}
+        Self {threads, tx: Some(tx), shutdown}
     }
 
     pub fn enqueue<F: 'static>(&self, f: F) where F: FnOnce()+Send {
@@ -55,7 +54,7 @@ fn worker(queue: crossbeam_channel::Receiver<Box<FnOnce()+Send>>) {
         let task = queue.recv();
         match task {
             Ok(t) => t(),
-            Err(e) => return,
+            Err(_e) => return,
         }
     }
 }
