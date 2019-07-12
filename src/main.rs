@@ -34,18 +34,16 @@ fn main() {
     use std::sync::{Arc,atomic};
 
     let now = std::time::Instant::now();
-    let mut pool = threadpool::ThreadPool::new(8);
+    let mut pool = threadpool::ThreadPool::new(8, 256);
     let prime_count = Arc::new(atomic::AtomicUsize::new(0));
-    let mut pool_queue = threadpool::TaskQueue::new();
     for i in 1..=max_num {
         let prime_count_clone = Arc::clone(&prime_count);
-        pool_queue.enqueue(move || {
+        pool.enqueue(move || {
             if is_prime(i % 65536) {
                 prime_count_clone.fetch_add(1, atomic::Ordering::Relaxed);
             }
         });
     }
-    pool.enqueue_many(pool_queue);
     pool.shutdown_wait();
     println!("Number of primes under {}: {}", max_num, prime_count.load(atomic::Ordering::Relaxed));
     println!("Elapsed time: {} ms", now.elapsed().as_millis());
