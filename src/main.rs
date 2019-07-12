@@ -34,7 +34,7 @@ fn main() {
     use std::sync::{Arc,atomic};
 
     let now = std::time::Instant::now();
-    let mut pool = threadpool::ThreadPool::new(8, 256);
+    let mut pool = threadpool::ThreadPool::new(8, 8192);
     let prime_count = Arc::new(atomic::AtomicUsize::new(0));
     for i in 1..=max_num {
         let prime_count_clone = Arc::clone(&prime_count);
