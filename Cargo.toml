@@ -7,3 +7,4 @@ edition = "2018"
 [dependencies]
 integer-sqrt = "0.1.2"
 parking_lot = "0.8"
+crossbeam-channel = "0.3"
