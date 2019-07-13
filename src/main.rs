@@ -19,16 +19,16 @@ fn is_prime(num: usize) -> bool {
 fn main() {
     let max_num = 4000000;
 
-    let now = std::time::Instant::now();
-    let mut prime_count = 0;
-    for i in 1..=max_num {
-        // println!("Number {}: prime = {}", i, is_prime(i));
-        if is_prime(i) {
-            prime_count += 1;
-        }
-    }
-    println!("Number of primes under {}: {}", max_num, prime_count);
-    println!("Elapsed time: {} ms", now.elapsed().as_millis());
+    // let now = std::time::Instant::now();
+    // let mut prime_count = 0;
+    // for i in 1..=max_num {
+    //     // println!("Number {}: prime = {}", i, is_prime(i));
+    //     if is_prime(i) {
+    //         prime_count += 1;
+    //     }
+    // }
+    // println!("Number of primes under {}: {}", max_num, prime_count);
+    // println!("Elapsed time: {} ms", now.elapsed().as_millis());
 
 
     use std::sync::{Arc,atomic};
