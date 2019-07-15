@@ -23,7 +23,7 @@ fn main() {
     // let mut prime_count = 0;
     // for i in 1..=max_num {
     //     // println!("Number {}: prime = {}", i, is_prime(i));
-    //     if is_prime(i) {
+    //     if is_prime(i % 65536) {
     //         prime_count += 1;
     //     }
     // }
@@ -40,7 +40,7 @@ fn main() {
     for i in 1..=max_num {
         let prime_count_clone = Arc::clone(&prime_count);
         pool_queue.enqueue(move || {
-            if is_prime(i) {
+            if is_prime(i % 65536) {
                 prime_count_clone.fetch_add(1, atomic::Ordering::Relaxed);
             }
         });
